@@ -378,7 +378,9 @@ type IPV6Address struct {
 // InterfaceFromACS validates the given ACS NetworkInterface information and creates an NetworkInterface object from it.
 func InterfaceFromACS(acsENI *ecsacs.ElasticNetworkInterface) (*NetworkInterface, error) {
 	err := ValidateENI(acsENI)
+	logger.Info("We were able to validate the eni")
 	if err != nil {
+		logger.Error("we are not able to validate eni")
 		return nil, err
 	}
 
