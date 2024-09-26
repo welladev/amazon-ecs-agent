@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	loggerfield "github.com/aws/amazon-ecs-agent/ecs-agent/logger/field"
 	"os"
 	"path/filepath"
 	"sort"
@@ -194,6 +195,9 @@ func (c *common) buildAWSVPCNetworkNamespaces(
 
 	macToNames, err := c.interfacesMACToName()
 	if err != nil {
+		logger.Error("Error getting interface to mac names", logger.Fields{
+			loggerfield.Error: err,
+		})
 		return nil, err
 	}
 
@@ -208,6 +212,7 @@ func (c *common) buildAWSVPCNetworkNamespaces(
 	if singleNetNS || len(taskPayload.ElasticNetworkInterfaces) == 1 ||
 		aws.StringValue(taskPayload.ElasticNetworkInterfaces[0].Name) == "" ||
 		len(taskPayload.Containers[0].NetworkInterfaceNames) == 0 {
+		logger.Info("We are about to build network namespace")
 		primaryNetNS, err := c.buildNetNS(taskID,
 			0,
 			taskPayload.ElasticNetworkInterfaces,
@@ -295,9 +300,14 @@ func (c *common) buildNetNS(
 	var ifaces []*networkinterface.NetworkInterface
 	lowestIdx := int64(indexHighValue)
 	for _, ni := range networkInterfaces {
+		logger.Info("Looping though network interface: " + *ni.MacAddress)
 		guestNetNS := ifaceToGuestNetNS[aws.StringValue(ni.Name)]
 		iface, err := networkinterface.New(ni, guestNetNS, networkInterfaces, macToName)
+		logger.Info("Got the guestNetNS")
 		if err != nil {
+			logger.Error("Error getting guestNetNS", logger.Fields{
+				loggerfield.Error: err,
+			})
 			return nil, err
 		}
 		if aws.Int64Value(ni.Index) < lowestIdx {

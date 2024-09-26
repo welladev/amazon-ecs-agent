@@ -45,8 +45,12 @@ func (m *managedLinux) BuildTaskNetworkConfiguration(
 	var err error
 	switch mode {
 	case ecs.NetworkModeAwsvpc:
+		logger.Info("We are about to build vpc for managed linux")
 		netNSs, err = m.common.buildAWSVPCNetworkNamespaces(taskID, taskPayload, false, nil)
 		if err != nil {
+			logger.Error("Error creating vpc mode", logger.Fields{
+				loggerfield.Error: err,
+			})
 			return nil, errors.Wrap(err, "failed to translate network configuration")
 		}
 	case ecs.NetworkModeHost:
