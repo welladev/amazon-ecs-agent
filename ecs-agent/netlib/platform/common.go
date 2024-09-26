@@ -16,6 +16,8 @@ package platform
 import (
 	"context"
 	"errors"
+	"github.com/aws/amazon-ecs-agent/ecs-agent/logger"
+	"strconv"
 	"time"
 
 	"github.com/aws/amazon-ecs-agent/ecs-agent/netlib/model/ecscni"
@@ -53,6 +55,7 @@ func (c *common) executeCNIPlugin(
 	defer cancel()
 
 	for _, cfg := range cniNetConf {
+		logger.Info("We are about to execute a cni plugin. Add CNI: " + strconv.FormatBool(add) + " pluginName: " + cfg.PluginName())
 		if add {
 			var addResult types.Result
 			addResult, err = c.cniClient.Add(ctx, cfg)
