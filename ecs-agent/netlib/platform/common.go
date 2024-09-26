@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"github.com/aws/amazon-ecs-agent/ecs-agent/logger"
+	loggerfield "github.com/aws/amazon-ecs-agent/ecs-agent/logger/field"
 	"strconv"
 	"time"
 
@@ -53,7 +54,9 @@ func (c *common) executeCNIPlugin(
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-
+	logger.Info("We are about to execute plugins", logger.Fields{
+		"PluginCount": len(cniNetConf),
+	})
 	for _, cfg := range cniNetConf {
 		logger.Info("We are about to execute a cni plugin. Add CNI: " + strconv.FormatBool(add) + " pluginName: " + cfg.PluginName())
 		if add {
@@ -67,6 +70,9 @@ func (c *common) executeCNIPlugin(
 		}
 
 		if err != nil {
+			logger.Error("There was an error executing a plugin "+strconv.FormatBool(add)+" pluginName: "+cfg.PluginName(), logger.Fields{
+				loggerfield.Error: err,
+			})
 			break
 		}
 	}
