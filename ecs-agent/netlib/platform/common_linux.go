@@ -717,6 +717,9 @@ func (c *common) configureBranchENI(ctx context.Context, netNSPath string, eni *
 
 	_, err = c.executeCNIPlugin(ctx, add, cniNetConf)
 	if err != nil {
+		logger.Error("Error executing cni plugin", logger.Fields{
+			loggerfield.Error: err,
+		})
 		err = errors.Wrap(err, "failed to setup branch eni")
 	}
 
